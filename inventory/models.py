@@ -18,7 +18,7 @@ class Product(models.Model):
         Method to update product quantity
         Can be used for sales, restocking, etc.
         """
-        self.quantity += quantity_change
+        self.stock_quantity += quantity_change
         self.save()
     
 class Category(models.Model):
@@ -42,3 +42,7 @@ class Sale(models.Model):
 
     def __str__(self):
         return self.name
+    
+    def save(self, *args, **kwargs):
+        self.total_sale = self.quantity_sold * self.unit_price
+        super().save(*args, **kwargs)

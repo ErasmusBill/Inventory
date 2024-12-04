@@ -1,5 +1,5 @@
 from django import forms
-from  .models import *
+from  .models import Product,Category,Sale
 from django.contrib.auth.models import User
 
 class SignUpForm(forms.ModelForm):
