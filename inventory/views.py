@@ -10,6 +10,8 @@ from django.db.models import Sum, F,DecimalField,Q,Avg
 from django.utils import timezone
 from django.db.models.functions import Coalesce
 from django.contrib.auth.models import Permission, Group
+from .decorator import *
+from django.contrib.auth.models import Group
 
 @require_http_methods(["POST"])
 def user_login(request):
@@ -37,14 +39,45 @@ def user_logout(request):
 
 @require_http_methods(["POST"])
 def user_signup(request):
-    form = SignUpForm(request.POST)
-    if form.is_valid():
-        user = form.save(commit=False)
-        user.set_password(form.cleaned_data['password'])
-        user.save()
-        return JsonResponse({'success': 'You have successfully created an account'}, status=201)
-    else:
-        return JsonResponse({'errors': form.errors}, status=400)
+    """
+    Function-based view for user signup without authentication
+    """
+    try:
+        data = json.loads(request.body)
+        form = SignUpForm(data)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data['password1'])
+            user.save()
+
+            return JsonResponse({
+                'success': True,
+                'message': 'You have successfully signed up!',
+                'user': {
+                    'username': user.username,
+                    'email': user.email,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'user_type': form.cleaned_data.get('user_type')
+                }
+            }, status=201)
+            
+        return JsonResponse({
+            'success': False,
+            'errors': form.errors
+        }, status=400)
+    
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'message': 'Invalid JSON data'
+        }, status=400)
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        }, status=500)
 
 @require_http_methods(["POST"])
 def user_change_password(request):

@@ -4,6 +4,7 @@ from . import views
 app_name = 'inventory'
 urlpatterns = [
     # User Authentication
+    path('',views.home, name='home'),
     path('login/', views.user_login, name='user_login'),
     path('logout/', views.user_logout, name='user_logout'),
     path('signup/', views.user_signup, name='user_signup'),
@@ -16,4 +17,8 @@ urlpatterns = [
     
     # Sales Calculation
     path('daily-sales/', views.calculate_daily_sales_by_product, name='calculate_daily_sales'),
+    path('product-detail/<int:product_id>',views.detail_product, name='product_deatial'),
+    
+    #search product
+    path('search-product',views.search,name='dearch')
 ]

@@ -4,15 +4,30 @@ from django.contrib.auth.forms import UserCreationForm
 from .models import Product, Category, Sale
 
 class SignUpForm(UserCreationForm):
+    """
+    Custom SignUp Form with additional fields
+    """
+    USER_TYPE_CHOICES = [
+        ('admin', 'Admin'),
+        ('salesperson', 'Salesperson')
+    ]
+    
     email = forms.EmailField(required=True)
     first_name = forms.CharField(max_length=30, required=False)
     last_name = forms.CharField(max_length=30, required=False)
+    user_type = forms.ChoiceField(
+        choices=USER_TYPE_CHOICES, 
+        required=True
+    )
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name', 'password1', 'password2')
+        fields = ('username', 'email', 'first_name', 'last_name', 'password1', 'password2', 'user_type')
 
     def clean_email(self):
+        """
+        Validate email uniqueness
+        """
         email = self.cleaned_data.get('email')
         # Check if email already exists
         if User.objects.filter(email=email).exists():
