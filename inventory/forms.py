@@ -2,6 +2,8 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from .models import Product, Category, Sale
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import get_user_model
 
 class SignUpForm(UserCreationForm):
     """
@@ -34,7 +36,7 @@ class SignUpForm(UserCreationForm):
             raise forms.ValidationError("This email is already in use.")
         return email
 
-class ChangePasswordForm(forms.Form):
+class ChangePasswordForm(PasswordChangeForm):
     old_password = forms.CharField(
         label='Current Password', 
         widget=forms.PasswordInput
