@@ -1,27 +1,16 @@
-from django.http import HttpResponse
-from django.shortcuts import redirect
+from django.http import JsonResponse
+from functools import wraps
 
-
-#def unauthenticated_user(view_func):
-#    def wrapper_func(request,*args,**kwargs):
- #       if request.user.is_authenticated:
-  #          return redirect('home')
-   #     else:
-    #        return view_func(request,*args,**kwargs)
-
-def allowed_users(allowed_roles=[]):
+def role_required(allowed_roles=[]):
     def decorator(view_func):
-        def wrapper_func(request,*args,**kwargs):
-            
-            group = None
-            if request.user.groups.exists():
-                group = request.user.all()[0].name
-            
-            if group in allowed_roles:
-                return view_func(request,*args,**kwargs)
+        @wraps(view_func)
+        def wrapper(request, *args, **kwargs):
+            if not request.user.is_authenticated:
+                return JsonResponse({'error': 'Authentication required'}, status=401)
+
+            if request.user.groups.filter(name__in=allowed_roles).exists():
+                return view_func(request, *args, **kwargs)
             else:
-                return HttpResponse('You are not authorized to view this page')
-            
-            return view_func()
-        return wrapper_func
+                return JsonResponse({'error': 'Permission denied'}, status=403)
+        return wrapper
     return decorator

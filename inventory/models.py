@@ -55,7 +55,7 @@ class Sale(models.Model):
 
 
     def __str__(self):
-        return self.name
+        return f"{self.product.product_name} - {self.quantity_sold} units"
     
     def save(self, *args, **kwargs):
         self.total_sale = self.quantity_sold * self.unit_price

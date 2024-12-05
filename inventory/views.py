@@ -49,6 +49,10 @@ def user_signup(request):
             user = form.save(commit=False)
             user.set_password(form.cleaned_data['password1'])
             user.save()
+            
+            group_name = 'Admin' if user.user_type == 'admin' else 'Salesperson'
+            group = Group.objects.get(name=group_name)
+            user.groups.add(group)
 
             return JsonResponse({
                 'success': True,
