@@ -14,6 +14,7 @@ from .decorator import *
 from django.contrib.auth.models import Group
 from .decorator import role_required 
 from django.views.decorators.csrf import csrf_protect,csrf_exempt
+from django.contrib import messages
 
 @require_http_methods(["POST"])
 @csrf_exempt
@@ -36,6 +37,7 @@ def user_login(request):
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
 @require_http_methods(["POST"])
+@csrf_exempt
 def user_logout(request):
     logout(request)
     return JsonResponse({'success': 'You have successfully logged out'}, status=200)
@@ -212,7 +214,10 @@ def detail_product(request, product_id):
     if not request.user.is_authenticated:
         return JsonResponse({'error': 'Authentication required'}, status=401)
 
-    product = get_object_or_404(Product, pk=product_id)
+    product = Product.objects.select_related('category').get(pk=product_id)
+    
+    # Prefetch related sales
+    sales = product.sale_set.select_related('user').all()
     return JsonResponse({
         'id': product.id,
         'product_name': product.product_name,
@@ -222,4 +227,14 @@ def detail_product(request, product_id):
         'category': product.category_set.first().name if product.category_set.exists() else None
     })
 
+def product_quantity_left(request,sale_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+
+    sale =   get_object_or_404(Sale,pk=sale_id)
+    stock_quantity_left = sale.product.stock_quantity - sale.quantity_sold
     
+    return JsonResponse({
+        'stock_quantity_left': stock_quantity_left
+        
+    },status=200)

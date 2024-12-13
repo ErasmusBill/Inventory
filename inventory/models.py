@@ -45,6 +45,7 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.username
+    
 class Product(models.Model):
     product_name = models.CharField(max_length=255)
     description = models.TextField()
@@ -63,6 +64,14 @@ class Product(models.Model):
         """
         self.stock_quantity += quantity_change
         self.save()
+        
+        
+    def quantity_left(self,ramaining_quantity):
+        """
+        Method to calculate product quantity left
+        """    
+        self.remaining_quantity = self.stock_quantity - Sale.product_quantity
+        self.save>()
     
 class Category(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
